@@ -1,5 +1,14 @@
-<?php
-/**GrinchVM Beta V 1.3*/
+<?php 
+/**GrinchVM Beta V 1.3.5
+------------------------------------------
+-----------------INDICE------------------- 
+------------------------------------------
+LINEA DE CODIGO |DESCRIPCIÓN
+------------------------------------------ 				
+ 				|Activación de directorios 
+     			|Directorio Base
+
+*/
 	$BASE_DIRECTORY    = TRUE;
 	$CONFIG_DIRECTORY  = TRUE;
 	$DYNAMIC_DIRECTORY = TRUE;
@@ -18,7 +27,7 @@ if($BASE_DIRECTORY == TRUE)
 	foreach ($folderPublic as $fdp)
 	{
 		mkdir('public/'.$fdp, 0755);
-		mkdir('public/'.$fdp, 0755);
+		chmod('public/'.$fdp, 0755);
 	}
 	touch("index.php", 0755);
 	touch("public/js/js.js", 0755);
@@ -59,7 +68,7 @@ if($BASE_DIRECTORY == TRUE)
 
 	touch("app/views/viewBase/footer.php", 0755);
 	$viewBaseFooter = fopen("app/views/viewBase/footer.php", "w");
-	fwrite($viewBaseFooter, "<footer><h3>FOOTER</h3></footer>" . PHP_EOL);
+	fwrite($viewBaseFooter, "<footer><h5>Powered by Verde Magenta </h5></footer>" . PHP_EOL);
 	fwrite($viewBaseFooter, "</body>" . PHP_EOL);
 	fwrite($viewBaseFooter, "</html>" . PHP_EOL);
 	fclose($viewBaseFooter);
@@ -123,7 +132,7 @@ if($DYNAMIC_DIRECTORY == TRUE)
 //-------------------------------------------------------------
 //DIRECTORIOS DINAMICOS
 //-------------------------------------------------------------
-//el siguiente arrary debe ser modificado según las necesidades del proyecto
+//el siguiente arrary debe ser modificado según las necesidades del proyecto(por defecto siempre debe ir index)
 	
 	$dynamicDirectory = array('index','servicios','contactos','portafolio','clientes','blog');
 	
