@@ -8,16 +8,21 @@
 if($BASE_DIRECTORY == TRUE)
 {
 /**CARPETAS BASE*/
-	$folderBase = array('app','js','css','img');
-	
+	$folderBase = array('app','public');
 	foreach($folderBase as $fdb)
 	{
 		mkdir($fdb, 0755);
 		chmod($fdb, 0755);
 	}
+	$folderPublic = array('js','css','img');
+	foreach ($folderPublic as $fdp)
+	{
+		mkdir('public/'.$fdp, 0755);
+		mkdir('public/'.$fdp, 0755);
+	}
 	touch("index.php", 0755);
-	touch("js/js.js", 0755);
-	touch("css/estilo.css", 0755);
+	touch("public/js/js.js", 0755);
+	touch("public/css/estilo.css", 0755);
 		
 		$mod = fopen("index.php", "w");
 		fwrite($mod, "<?php" . PHP_EOL);
@@ -47,8 +52,8 @@ if($BASE_DIRECTORY == TRUE)
 	fwrite($viewBaseHeader, '<meta name="author" content="VerdeMagenta"/>' . PHP_EOL);
 	fwrite($viewBaseHeader, "<body>" . PHP_EOL);
 	fwrite($viewBaseHeader, '<title><?=$title;?></title>' . PHP_EOL);
-	fwrite($viewBaseHeader, '<link href="css/estilo.css" rel="stylesheet" type="text/css">' . PHP_EOL);
-	fwrite($viewBaseHeader, '<script type="text/javascript" src="js/js.js"></script>' . PHP_EOL);
+	fwrite($viewBaseHeader, '<link href="public/css/estilo.css" rel="stylesheet" type="text/css">' . PHP_EOL);
+	fwrite($viewBaseHeader, '<script type="text/javascript" src="public/js/js.js"></script>' . PHP_EOL);
 	fwrite($viewBaseHeader, "<header><h3>HEADER</h3></header>" . PHP_EOL);
 	fclose($viewBaseHeader);
 
@@ -61,8 +66,8 @@ if($BASE_DIRECTORY == TRUE)
 }
 if($CONFIG_DIRECTORY == TRUE)
 {
-//-----------------------------------------------------------
-// DIRECTORIOS DE CONFIGURACION
+//--------------------------------------------------------
+// DIRECTORIOS DE CONFIGURACION							 -
 //--------------------------------------------------------
 //configuración estatica , solo es necesario editar la conexion a la base de datos
 	$configDirectory = array('content','controller','database','models','meta');
@@ -120,7 +125,7 @@ if($DYNAMIC_DIRECTORY == TRUE)
 //-------------------------------------------------------------
 //el siguiente arrary debe ser modificado según las necesidades del proyecto
 	
-	$dynamicDirectory = array('index','contacto','servicios','nosotros');
+	$dynamicDirectory = array('index','servicios','contactos','portafolio','clientes','blog');
 	
 	foreach($dynamicDirectory as $dd)
 	{
