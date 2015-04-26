@@ -61,7 +61,7 @@ if($BASE_DIRECTORY == TRUE)
 	fwrite($viewBaseHeader, '<title><?=$title;?></title>' . PHP_EOL);
 	fwrite($viewBaseHeader, '<link href="public/css/estilo.css" rel="stylesheet" type="text/css">' . PHP_EOL);
 	fwrite($viewBaseHeader, '<script type="text/javascript" src="public/js/js.js"></script>' . PHP_EOL);
-	fwrite($viewBaseHeader, "<header><h3>HEADER</h3></header>" . PHP_EOL);
+	fwrite($viewBaseHeader, 'header><nav><?=$nombreProyecto;?></nav></header>' . PHP_EOL);
 	fclose($viewBaseHeader);
 
 	touch("app/views/viewBase/footer.php", 0755);
@@ -124,11 +124,11 @@ if($CONFIG_DIRECTORY == TRUE)
 		fwrite($configMeta, '<?php' . PHP_EOL.  
 							'function saca_dominio($url)'.PHP_EOL.
 							'{'.PHP_EOL.
-							"	$protocolos = array('http://', 'https://', 'ftp://', 'www.','.cl','.com','.net','.org');".PHP_EOL.
-	                        "	$url = explode('/', str_replace($protocolos, '', $url));".PHP_EOL.
+							'	$protocolos = array("http://", "https://", "ftp://", "www.",".cl",".com",".net",".org");'.PHP_EOL.
+	                        '	$url = explode("/", str_replace($protocolos, "", $url));'.PHP_EOL.
     	                    '	return $url[0];'.PHP_EOL.
 							'}'.PHP_EOL.
-							"$nombreProyecto=saca_dominio('verdemagenta');".PHP_EOL.
+							'$nombreProyecto=saca_dominio("verdemagenta");'.PHP_EOL.
 							'$file = basename($_SERVER["SERVER_NAME"]);');
 		fclose($configMeta);
 }
