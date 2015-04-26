@@ -1,13 +1,5 @@
 <?php 
-/**GrinchVM Beta V 1.3.5
-------------------------------------------
------------------INDICE------------------- 
-------------------------------------------
-LINEA DE CODIGO |DESCRIPCIÓN
------------------------------------------- 				
- 				|Activación de directorios 
-     			|Directorio Base
-
+/**GrinchVM Beta V 1.3.5	
 */
 	$BASE_DIRECTORY    = TRUE;
 	$CONFIG_DIRECTORY  = TRUE;
@@ -38,10 +30,16 @@ if($BASE_DIRECTORY == TRUE)
 		fwrite($mod, "include('app/config/controller.php');" . PHP_EOL);
 		fclose($mod);
 //-------------------------------------------------------
-//| DIRECTORIOS basename(path)						   ||
+//| DIRECTORIOS BASE        						   ||
 //-------------------------------------------------------
 	$baseDirectory = array('controllers','models','views','config','helpers');
-	
+	function saca_dominio($url)
+	{
+    	$protocolos = array('http://', 'https://', 'ftp://', 'www.','.cl','.com','.net','.org');
+    	$url = explode('/', str_replace($protocolos, '', $url));
+    	return $url[0];
+	}
+	echo saca_dominio($_SERVER["SERVER_NAME"]);
 	foreach($baseDirectory as $b)
 	{
 		mkdir("app/".$b, 0755);
@@ -123,8 +121,15 @@ if($CONFIG_DIRECTORY == TRUE)
 		fclose($configModel);
 
 		$configMeta = fopen("app/config/meta.php", "w");
-		fwrite($configMeta, '<?php' . PHP_EOL);
-		fwrite($configMeta, '$file = basename($_SERVER["PHP_SELF"]);');
+		fwrite($configMeta, '<?php' . PHP_EOL.  
+							'function saca_dominio($url)'.PHP_EOL.
+							'{'.PHP_EOL.
+							"	$protocolos = array('http://', 'https://', 'ftp://', 'www.','.cl','.com','.net','.org');".PHP_EOL.
+	                        "	$url = explode('/', str_replace($protocolos, '', $url));".PHP_EOL.
+    	                    '	return $url[0];'.PHP_EOL.
+							'}'.PHP_EOL.
+							"$nombreProyecto=saca_dominio('verdemagenta');".PHP_EOL.
+							'$file = basename($_SERVER["SERVER_NAME"]);');
 		fclose($configMeta);
 }
 if($DYNAMIC_DIRECTORY == TRUE)
@@ -134,7 +139,7 @@ if($DYNAMIC_DIRECTORY == TRUE)
 //-------------------------------------------------------------
 //el siguiente arrary debe ser modificado según las necesidades del proyecto(por defecto siempre debe ir index)
 	
-	$dynamicDirectory = array('index','servicios','contactos','portafolio','clientes','blog');
+	$dynamicDirectory = array('index');
 	
 	foreach($dynamicDirectory as $dd)
 	{
