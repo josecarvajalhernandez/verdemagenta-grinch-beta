@@ -1,10 +1,10 @@
 <?php 
-/**GrinchVM Beta V 1.3.5	
-*/
+/**GrinchVM Beta V 1.3.5*/
 	$BASE_DIRECTORY    = TRUE;
 	$CONFIG_DIRECTORY  = TRUE;
 	$DYNAMIC_DIRECTORY = TRUE;
 	$HELPERS_DIRECTORY = TRUE;
+	$MENU_FILE 		   = TRUE;
 
 if($BASE_DIRECTORY == TRUE)
 {
@@ -21,14 +21,14 @@ if($BASE_DIRECTORY == TRUE)
 		mkdir('public/'.$fdp, 0755);
 		chmod('public/'.$fdp, 0755);
 	}
-	touch("index.php", 0755);
+	touch(".htaccess", 0755);
+	$htacces = fopen(".htaccess", "w");
+	fwrite($htacces, "DirectoryIndex app/controllers/index/index.php" . PHP_EOL);
+	fclose($htacces);
+
 	touch("public/js/js.js", 0755);
-	touch("public/css/estilo.css", 0755);
+	touch("public/css/estilo.css", 0755);	
 		
-		$mod = fopen("index.php", "w");
-		fwrite($mod, "<?php" . PHP_EOL);
-		fwrite($mod, "include('app/config/controller.php');" . PHP_EOL);
-		fclose($mod);
 //-------------------------------------------------------
 //| DIRECTORIOS BASE        						   ||
 //-------------------------------------------------------
@@ -52,17 +52,21 @@ if($BASE_DIRECTORY == TRUE)
 	$viewBaseHeader = fopen("app/views/viewBase/header.php", "w");
 	fwrite($viewBaseHeader, "<!DOCTYPE html>" . PHP_EOL);
 	fwrite($viewBaseHeader, "<html lang='esp'>" . PHP_EOL);
+	fwrite($viewBaseHeader, "<head>" . PHP_EOL);
 	fwrite($viewBaseHeader, "<meta charset='UTF-8'>" . PHP_EOL);
 	fwrite($viewBaseHeader, "<meta name='viewport' content='width=device-width, initial-scale=1.0'> " . PHP_EOL);
 	fwrite($viewBaseHeader, '<meta name="robots" content="INDEX,FOLLOW,ARCHIVE"> ' . PHP_EOL);
 	fwrite($viewBaseHeader, '<meta name="description" content="<?=$description?>"/>' . PHP_EOL);
 	fwrite($viewBaseHeader, '<meta name="author" content="VerdeMagenta"/>' . PHP_EOL);
-	fwrite($viewBaseHeader, "<body>" . PHP_EOL);
 	fwrite($viewBaseHeader, '<title><?=$title;?></title>' . PHP_EOL);
-	fwrite($viewBaseHeader, '<link href="public/css/estilo.css" rel="stylesheet" type="text/css">' . PHP_EOL);
-	fwrite($viewBaseHeader, '<script type="text/javascript" src="public/js/js.js"></script>' . PHP_EOL);
-	fwrite($viewBaseHeader, 'header><nav><?=$nombreProyecto;?></nav></header>' . PHP_EOL);
+	fwrite($viewBaseHeader, "<link href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/public/css/estilo.css' rel='stylesheet' type='text/css'>" . PHP_EOL);
+	fwrite($viewBaseHeader, "<script type='text/javascript' src='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/public/js/js.js'></script>" . PHP_EOL);
+	fwrite($viewBaseHeader, "</head>" . PHP_EOL);
+	fwrite($viewBaseHeader, "<body>" . PHP_EOL);
+	fwrite($viewBaseHeader, '<div><?=$nombreProyecto;?></div>' . PHP_EOL);
 	fclose($viewBaseHeader);
+
+	touch("app/views/viewBase/menu.php",0755);
 
 	touch("app/views/viewBase/footer.php", 0755);
 	$viewBaseFooter = fopen("app/views/viewBase/footer.php", "w");
@@ -71,6 +75,7 @@ if($BASE_DIRECTORY == TRUE)
 	fwrite($viewBaseFooter, "</html>" . PHP_EOL);
 	fclose($viewBaseFooter);
 }
+
 if($CONFIG_DIRECTORY == TRUE)
 {
 //--------------------------------------------------------
@@ -88,15 +93,8 @@ if($CONFIG_DIRECTORY == TRUE)
 		fwrite($configContent, '<?php' . PHP_EOL.
 							   '$file = basename($_SERVER["PHP_SELF"]);' . PHP_EOL.
 							   '$folder = str_replace(".php", "", $file);' . PHP_EOL.
-							   "include('app/views/'.".'$folder'.".'/content.php');");
+							   "include('../../views/'.".'$folder'.".'/content.php');");
 		fclose($configContent);
-
-		$configController = fopen("app/config/controller.php", "w");
-		fwrite($configController, '<?php' . PHP_EOL.
-								   '$file = basename($_SERVER["PHP_SELF"]);' . PHP_EOL.
-								   '$folder = str_replace(".php", "", $file);' . PHP_EOL.
-							       "include('app/controllers/'.".'$folder'.".'/'.".'$file'.");");
-		fclose($configController);
 
 		$configDataBase = fopen("app/config/database.php", "w");
 		fwrite($configDataBase, '<?php' . PHP_EOL.
@@ -128,8 +126,8 @@ if($CONFIG_DIRECTORY == TRUE)
 	                        '	$url = explode("/", str_replace($protocolos, "", $url));'.PHP_EOL.
     	                    '	return $url[0];'.PHP_EOL.
 							'}'.PHP_EOL.
-							'$nombreProyecto=saca_dominio("verdemagenta");'.PHP_EOL.
-							'$file = basename($_SERVER["SERVER_NAME"]);');
+							'$nombreProyecto=saca_dominio($_SERVER["SERVER_NAME"]);'.PHP_EOL.
+							'$file = basename($_SERVER["PHP_SELF"]);');
 		fclose($configMeta);
 }
 if($DYNAMIC_DIRECTORY == TRUE)
@@ -139,7 +137,7 @@ if($DYNAMIC_DIRECTORY == TRUE)
 //-------------------------------------------------------------
 //el siguiente arrary debe ser modificado según las necesidades del proyecto(por defecto siempre debe ir index)
 	
-	$dynamicDirectory = array('index');
+	$dynamicDirectory = array('index','directorio','bla');
 	
 	foreach($dynamicDirectory as $dd)
 	{
@@ -151,10 +149,11 @@ if($DYNAMIC_DIRECTORY == TRUE)
 
 		$controllers = fopen("app/controllers/".$dd.'/'.$dd.".php", "w");
 		fwrite($controllers, "<?php" . PHP_EOL);
-		fwrite($controllers, "include('app/config/meta.php');" . PHP_EOL);
-		fwrite($controllers, "include('app/views/viewBase/header.php');" . PHP_EOL);
-		fwrite($controllers, "include('app/config/content.php');" . PHP_EOL);
-		fwrite($controllers, "include('app/views/viewBase/footer.php');" . PHP_EOL);
+		fwrite($controllers, "include('../../config/meta.php');" . PHP_EOL);
+		fwrite($controllers, "include('../../views/viewBase/header.php');" . PHP_EOL);
+		fwrite($controllers, "include('../../views/viewBase/menu.php');" . PHP_EOL);
+		fwrite($controllers, "include('../../config/content.php');" . PHP_EOL);
+		fwrite($controllers, "include('../../views/viewBase/footer.php');" . PHP_EOL);
 		fclose($controllers);
 
 		touch("app/models/".$dd.".php", 0755);
@@ -198,6 +197,17 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		fwrite($dynamicMeta, PHP_EOL . "if(".'$file'." == '".$dd.".php')".'$description'." = '".$dd."';");
 		fclose($dynamicMeta);
 	}
+}
+if($MENU_FILE == "TRUE")
+{
+		$dynamicMeta = fopen("app/views/viewBase/menu.php", "a");
+		fwrite($dynamicMeta, PHP_EOL . '<ul>');
+		foreach ($dynamicDirectory as $mn)
+		{
+			fwrite($dynamicMeta, PHP_EOL . "<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/app/controllers/".$mn."/".$mn.".php'>".$mn."</a></li>");	
+		}
+		fwrite($dynamicMeta, PHP_EOL . '</ul>');
+		fclose($dynamicMeta);
 }
 //-------------------------------------------------------------
 //INSTALANDOR HELPERS
