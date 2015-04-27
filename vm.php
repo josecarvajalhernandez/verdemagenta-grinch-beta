@@ -24,6 +24,7 @@ if($BASE_DIRECTORY == TRUE)
 	touch(".htaccess", 0755);
 	$htacces = fopen(".htaccess", "w");
 	fwrite($htacces, "DirectoryIndex app/controllers/index/index.php" . PHP_EOL);
+	fwrite($htacces,"RewriteEngine on" . PHP_EOL);
 	fclose($htacces);
 
 	touch("public/js/js.js", 0755);
@@ -137,7 +138,7 @@ if($DYNAMIC_DIRECTORY == TRUE)
 //-------------------------------------------------------------
 //el siguiente arrary debe ser modificado según las necesidades del proyecto(por defecto siempre debe ir index)
 	
-	$dynamicDirectory = array('index','directorio','bla');
+	$dynamicDirectory = array('index','nosotros','servicios','clientes','productos','contacto','blog');
 	
 	foreach($dynamicDirectory as $dd)
 	{
@@ -196,6 +197,10 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		fwrite($dynamicMeta, PHP_EOL . "if(".'$file'." == '".$dd.".php')".'$title'." = '".$dd."';");
 		fwrite($dynamicMeta, PHP_EOL . "if(".'$file'." == '".$dd.".php')".'$description'." = '".$dd."';");
 		fclose($dynamicMeta);
+
+		$htaccesDinamic = fopen(".htaccess", "a");
+		fwrite($htaccesDinamic, "RewriteRule ^".$dd."$ /app/controllers/".$dd."/".$dd.".php [L]" . PHP_EOL);
+		fclose($htaccesDinamic);
 	}
 }
 if($MENU_FILE == "TRUE")
@@ -204,7 +209,7 @@ if($MENU_FILE == "TRUE")
 		fwrite($dynamicMeta, PHP_EOL . '<ul>');
 		foreach ($dynamicDirectory as $mn)
 		{
-			fwrite($dynamicMeta, PHP_EOL . "<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/app/controllers/".$mn."/".$mn.".php'>".$mn."</a></li>");	
+			fwrite($dynamicMeta, PHP_EOL . "<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/".$mn."'>".$mn."</a></li>");	
 		}
 		fwrite($dynamicMeta, PHP_EOL . '</ul>');
 		fclose($dynamicMeta);
