@@ -5,6 +5,7 @@
 	$DYNAMIC_DIRECTORY = TRUE;
 	$HELPERS_DIRECTORY = TRUE;
 	$MENU_FILE 		   = TRUE;
+	$ADMIN    	       = TRUE;
 
 if($BASE_DIRECTORY == TRUE)
 {
@@ -79,10 +80,11 @@ if($BASE_DIRECTORY == TRUE)
 
 if($CONFIG_DIRECTORY == TRUE)
 {
-//--------------------------------------------------------
-// DIRECTORIOS DE CONFIGURACION							 -
-//--------------------------------------------------------
+//--------------------------------------------------------------------------------------------
+// DIRECTORIOS DE CONFIGURACION							                                     |
+//--------------------------------------------------------------------------------------------
 //configuración estatica , solo es necesario editar la conexion a la base de datos
+
 	$configDirectory = array('content','controller','database','models','meta');
 	
 	foreach($configDirectory as $c)
@@ -128,14 +130,16 @@ if($CONFIG_DIRECTORY == TRUE)
     	                    '	return $url[0];'.PHP_EOL.
 							'}'.PHP_EOL.
 							'$nombreProyecto=saca_dominio($_SERVER["SERVER_NAME"]);'.PHP_EOL.
-							'$file = basename($_SERVER["PHP_SELF"]);');
+							'$file = basename($_SERVER["PHP_SELF"]);'
+							'$title 	  = $nombreProyecto;'.PHP_EOL.
+							'$description = $nombreProyecto;');
 		fclose($configMeta);
 }
 if($DYNAMIC_DIRECTORY == TRUE)
 {
-//-------------------------------------------------------------
-//DIRECTORIOS DINAMICOS
-//-------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------
+//DIRECTORIOS DINAMICOS																						 |	
+//------------------------------------------------------------------------------------------------------------
 //el siguiente arrary debe ser modificado según las necesidades del proyecto(por defecto siempre debe ir index)
 	
 	$dynamicDirectory = array('index','nosotros','servicios','clientes','productos','contacto','blog');
@@ -201,6 +205,7 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		$htaccesDinamic = fopen(".htaccess", "a");
 		fwrite($htaccesDinamic, "RewriteRule ^".$dd."$ /app/controllers/".$dd."/".$dd.".php [L]" . PHP_EOL);
 		fclose($htaccesDinamic);
+
 	}
 }
 if($MENU_FILE == "TRUE")
@@ -291,4 +296,24 @@ if($HELPERS_DIRECTORY == TRUE)
 		fwrite($helper_validation, '}' . PHP_EOL);
 		fclose($helper_validation);
 	}
+}
+if($ADMIN == TRUE)
+{
+	$USUARIO = TRUE;
+	$BLOG    = TRUE;
+
+	touch("app/views/viewBase/menuAdmin.php", 0755);
+	$adminMenu = fopen("app/views/viewBase/menuAdmin.php", "w");
+	fwrite($adminMenu, PHP_EOL . '<h3>Administración</h3>');
+	fwrite($adminMenu, PHP_EOL . '<ul>');
+	if($BLOG == TRUE) 
+	{
+		fwrite($adminMenu, PHP_EOL . "<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/admin/blog'>blog</a></li>");
+		
+		touch("app/controllers/admin/blog.php", 0755);
+		$adminBlog = fopen("app/controllers/admin/blog.php", "w");
+		fwrite($adminBlog, PHP_EOL.'<ul>');
+	}
+	fwrite($adminMenu, PHP_EOL.'</ul>');
+	fclose($adminMenu);
 }
