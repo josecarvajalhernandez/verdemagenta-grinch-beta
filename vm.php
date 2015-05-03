@@ -130,7 +130,7 @@ if($CONFIG_DIRECTORY == TRUE)
     	                    '	return $url[0];'.PHP_EOL.
 							'}'.PHP_EOL.
 							'$nombreProyecto=saca_dominio($_SERVER["SERVER_NAME"]);'.PHP_EOL.
-							'$file = basename($_SERVER["PHP_SELF"]);'
+							'$file = basename($_SERVER["PHP_SELF"]);'.PHP_EOL.
 							'$title 	  = $nombreProyecto;'.PHP_EOL.
 							'$description = $nombreProyecto;');
 		fclose($configMeta);
@@ -301,18 +301,31 @@ if($ADMIN == TRUE)
 {
 	$USUARIO = TRUE;
 	$BLOG    = TRUE;
+	mkdir("app/controllers/admin",0755);
+	
+	touch("app/controllers/admin/admin.php", 0755);
+	
+	$admin = fopen("app/controllers/admin/admin.php","w");
+	fwrite($admin,'<?php'.PHP_EOL);
+	fwrite($admin,'include("../../config/meta.php");'.PHP_EOL);
+	fwrite($admin,'include("../../views/viewBase/header.php");'.PHP_EOL);
+	fwrite($admin,'include("../../views/viewBase/menu.php");'.PHP_EOL);
+	fwrite($admin,'include("../../views/viewBase/menuAdmin.php");'.PHP_EOL);
+	fwrite($admin,'include("../../config/content.php");'.PHP_EOL);
+	fwrite($admin,'include("../../views/viewBase/footer.php");'.PHP_EOL);
 
 	touch("app/views/viewBase/menuAdmin.php", 0755);
+
 	$adminMenu = fopen("app/views/viewBase/menuAdmin.php", "w");
-	fwrite($adminMenu, PHP_EOL . '<h3>Administración</h3>');
-	fwrite($adminMenu, PHP_EOL . '<ul>');
+	fwrite($adminMenu,PHP_EOL.'<h3>Administración</h3>');
+	fwrite($adminMenu,PHP_EOL.'<ul>');
 	if($BLOG == TRUE) 
 	{
-		fwrite($adminMenu, PHP_EOL . "<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/admin/blog'>blog</a></li>");
+		fwrite($adminMenu, PHP_EOL . "	<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/admin/blog'>blog</a></li>");
 		
 		touch("app/controllers/admin/blog.php", 0755);
 		$adminBlog = fopen("app/controllers/admin/blog.php", "w");
-		fwrite($adminBlog, PHP_EOL.'<ul>');
+		fwrite($adminBlog, PHP_EOL.'<?php');
 	}
 	fwrite($adminMenu, PHP_EOL.'</ul>');
 	fclose($adminMenu);
