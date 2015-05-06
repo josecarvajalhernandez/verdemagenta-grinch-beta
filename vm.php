@@ -202,9 +202,10 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		fwrite($dynamicMeta, PHP_EOL . "if(".'$file'." == '".$dd.".php')".'$description'." = '".$dd."';");
 		fclose($dynamicMeta);
 
-		$htaccesDinamic = fopen(".htaccess", "a");
-		fwrite($htaccesDinamic, "RewriteRule ^".$dd."$ /app/controllers/".$dd."/".$dd.".php [L]" . PHP_EOL);
-		fclose($htaccesDinamic);
+		$htaccessDinamic = fopen(".htaccess", "a");
+		fwrite($htaccessDinamic, "RewriteRule ^".$dd."$ /app/controllers/".$dd."/".$dd.".php [L]" . PHP_EOL);
+		fwrite($htaccessDinamic, "RewriteRule ^".$dd."/$ /app/controllers/".$dd."/".$dd.".php [L]" . PHP_EOL);
+		fclose($htaccessDinamic);
 
 	}
 }
@@ -301,31 +302,59 @@ if($ADMIN == TRUE)
 {
 	$USUARIO = TRUE;
 	$BLOG    = TRUE;
+	
 	mkdir("app/controllers/admin",0755);
+	mkdir("app/views/admin",0755);
 	
 	touch("app/controllers/admin/admin.php", 0755);
-	
+	touch("app/views/viewBase/menuAdmin.php", 0755);
+	touch("app/views/admin/contentAdmin.php", 0755);	
+
+	$contentAdmin = fopen("app/views/admin/contentAdmin.php", "w");
+	fwrite($contentAdmin, '<h2>Panel de administración <?=$_SERVER["SERVER_NAME"];?></h2>' . PHP_EOL);
+	fclose($contentAdmin);
+
 	$admin = fopen("app/controllers/admin/admin.php","w");
+	
 	fwrite($admin,'<?php'.PHP_EOL);
 	fwrite($admin,'include("../../config/meta.php");'.PHP_EOL);
 	fwrite($admin,'include("../../views/viewBase/header.php");'.PHP_EOL);
 	fwrite($admin,'include("../../views/viewBase/menu.php");'.PHP_EOL);
 	fwrite($admin,'include("../../views/viewBase/menuAdmin.php");'.PHP_EOL);
-	fwrite($admin,'include("../../config/content.php");'.PHP_EOL);
+	fwrite($admin,'include("../../views/admin/contentAdmin.php");'.PHP_EOL);
 	fwrite($admin,'include("../../views/viewBase/footer.php");'.PHP_EOL);
-
-	touch("app/views/viewBase/menuAdmin.php", 0755);
 
 	$adminMenu = fopen("app/views/viewBase/menuAdmin.php", "w");
 	fwrite($adminMenu,PHP_EOL.'<h3>Administración</h3>');
 	fwrite($adminMenu,PHP_EOL.'<ul>');
+
+	$htaccessAdmin= fopen(".htaccess", "a");
+	fwrite($htaccessAdmin, "RewriteRule ^admin$ /app/controllers/admin/admin.php [L]" . PHP_EOL);
+	fwrite($htaccessAdmin, "RewriteRule ^admin/$ /app/controllers/admin/admin.php [L]" . PHP_EOL);
+	fclose($htaccessAdmin);
+
 	if($BLOG == TRUE) 
 	{
-		fwrite($adminMenu, PHP_EOL . "	<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/admin/blog'>blog</a></li>");
+		$htaccessBlog = fopen(".htaccess", "a");
+		fwrite($htaccessBlog, "RewriteRule ^admin/blog$ /app/controllers/admin/blog.php [L]" . PHP_EOL);
+		fwrite($htaccessBlog, "RewriteRule ^admin/blog/$ /app/controllers/admin/blog.php [L]" . PHP_EOL);
+		fclose($htaccessBlog);
+
+
+		fwrite($adminMenu,"	<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/admin/blog'>blog</a></li>".PHP_EOL);
 		
 		touch("app/controllers/admin/blog.php", 0755);
+		touch("app/views/admin/contentBlog.php", 0755);
+
 		$adminBlog = fopen("app/controllers/admin/blog.php", "w");
-		fwrite($adminBlog, PHP_EOL.'<?php');
+		
+		fwrite($adminBlog,'<?php'.PHP_EOL);
+		fwrite($adminBlog,'include("../../config/meta.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/viewBase/header.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/viewBase/menu.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/admin/contentBlog.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/viewBase/footer.php");'.PHP_EOL);
+		fclose($adminBlog);
 	}
 	fwrite($adminMenu, PHP_EOL.'</ul>');
 	fclose($adminMenu);
