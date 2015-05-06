@@ -72,7 +72,7 @@ if($BASE_DIRECTORY == TRUE)
 
 	touch("app/views/viewBase/footer.php", 0755);
 	$viewBaseFooter = fopen("app/views/viewBase/footer.php", "w");
-	fwrite($viewBaseFooter, "<footer><h5>Powered by Verde Magenta </h5></footer>" . PHP_EOL);
+	fwrite($viewBaseFooter, "<footer><h5>Powered by VerdeMagenta </h5></footer>" . PHP_EOL);
 	fwrite($viewBaseFooter, "</body>" . PHP_EOL);
 	fwrite($viewBaseFooter, "</html>" . PHP_EOL);
 	fclose($viewBaseFooter);
@@ -355,7 +355,9 @@ if($ADMIN == TRUE)
 		fwrite($adminBlog,'include("../../views/admin/contentBlog.php");'.PHP_EOL);
 		fwrite($adminBlog,'include("../../views/viewBase/footer.php");'.PHP_EOL);
 		fclose($adminBlog);
+
 	}
+
 	fwrite($adminMenu, PHP_EOL.'</ul>');
 	fclose($adminMenu);
 }
