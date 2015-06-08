@@ -1,5 +1,9 @@
 <?php 
-/**GrinchVM Beta V 1.3.5*/
+/**GrinchVM Beta V 1.3.5.2
+ 	
+ 	El uso es de esta aplicación es de uso exclusivo para el equipo de desarrollo, no del cliente final,
+	por lo tanto este archivo luego de ser utilizado debe ser removido del servidor del cliente
+*/
 	$BASE_DIRECTORY    = TRUE;
 	$CONFIG_DIRECTORY  = TRUE;
 	$DYNAMIC_DIRECTORY = TRUE;
@@ -37,11 +41,11 @@ if($BASE_DIRECTORY == TRUE)
 	$baseDirectory = array('controllers','models','views','config','helpers');
 	function saca_dominio($url)
 	{
-    	$protocolos = array('http://', 'https://', 'ftp://', 'www.','.cl','.com','.net','.org');
+    	$protocolos = array('http://', 'https://', 'ftp://', 'www.','.cl','.com','.net','.org','.co','.es','.io','.info','.ar','.ve');
     	$url = explode('/', str_replace($protocolos, '', $url));
     	return $url[0];
 	}
-	echo saca_dominio($_SERVER["SERVER_NAME"]);
+	echo 'Haz instalado el framework en '.saca_dominio($_SERVER["SERVER_NAME"]).' correctamente';
 	foreach($baseDirectory as $b)
 	{
 		mkdir("app/".$b, 0755);
@@ -129,10 +133,11 @@ if($CONFIG_DIRECTORY == TRUE)
 	                        '	$url = explode("/", str_replace($protocolos, "", $url));'.PHP_EOL.
     	                    '	return $url[0];'.PHP_EOL.
 							'}'.PHP_EOL.
-							'$nombreProyecto=saca_dominio($_SERVER["SERVER_NAME"]);'.PHP_EOL.
-							'$file = basename($_SERVER["PHP_SELF"]);'.PHP_EOL.
-							'$title 	  = $nombreProyecto;'.PHP_EOL.
-							'$description = $nombreProyecto;');
+							'$nombreProyecto = saca_dominio($_SERVER["SERVER_NAME"]);'.PHP_EOL.
+							'$urlBase        = $_SERVER["SERVER_NAME"];'.PHP_EOL.
+							'$file           = basename($_SERVER["PHP_SELF"]);'.PHP_EOL.
+							'$title          = $nombreProyecto;'.PHP_EOL.
+							'$description    = $nombreProyecto;');
 		fclose($configMeta);
 }
 if($DYNAMIC_DIRECTORY == TRUE)
@@ -300,7 +305,7 @@ if($HELPERS_DIRECTORY == TRUE)
 }
 if($ADMIN == TRUE)
 {
-	$USUARIO = TRUE;
+	$LOGIN = TRUE;
 	$BLOG    = TRUE;
 	
 	mkdir("app/controllers/admin",0755);
@@ -325,8 +330,9 @@ if($ADMIN == TRUE)
 	fwrite($admin,'include("../../views/viewBase/footer.php");'.PHP_EOL);
 
 	$adminMenu = fopen("app/views/viewBase/menuAdmin.php", "w");
-	fwrite($adminMenu,PHP_EOL.'<h3>Administración</h3>');
+	fwrite($adminMenu,PHP_EOL.'<h3>Menú de Administración</h3>');
 	fwrite($adminMenu,PHP_EOL.'<ul>');
+	fwrite($adminMenu,PHP_EOL."	<li><a href='http://".'<?=$urlBase?>'."/admin'>Home</a></li>");
 
 	$htaccessAdmin= fopen(".htaccess", "a");
 	fwrite($htaccessAdmin, "RewriteRule ^admin$ /app/controllers/admin/admin.php [L]" . PHP_EOL);
@@ -340,8 +346,7 @@ if($ADMIN == TRUE)
 		fwrite($htaccessBlog, "RewriteRule ^admin/blog/$ /app/controllers/admin/blog.php [L]" . PHP_EOL);
 		fclose($htaccessBlog);
 
-
-		fwrite($adminMenu,"	<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/admin/blog'>blog</a></li>".PHP_EOL);
+		fwrite($adminMenu,"	<li><a href='http://".'<?=$urlBase?>'."/admin/blog'>blog</a></li>".PHP_EOL);
 		
 		touch("app/controllers/admin/blog.php", 0755);
 		touch("app/views/admin/contentBlog.php", 0755);
@@ -352,12 +357,33 @@ if($ADMIN == TRUE)
 		fwrite($adminBlog,'include("../../config/meta.php");'.PHP_EOL);
 		fwrite($adminBlog,'include("../../views/viewBase/header.php");'.PHP_EOL);
 		fwrite($adminBlog,'include("../../views/viewBase/menu.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/viewBase/menuAdmin.php");'.PHP_EOL);
 		fwrite($adminBlog,'include("../../views/admin/contentBlog.php");'.PHP_EOL);
 		fwrite($adminBlog,'include("../../views/viewBase/footer.php");'.PHP_EOL);
 		fclose($adminBlog);
-
 	}
+	if($LOGIN == TRUE)
+	{
+		$htaccessPerfil = fopen(".htaccess", "a");
+		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
+		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil/$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
+		fclose($htaccessPerfil);
+		fwrite($adminMenu,"	<li><a href='http://".'<?=$urlBase?>'."/admin/mi-perfil'>Mi Perfil</a></li>".PHP_EOL);
 
+		touch("app/controllers/admin/perfil.php", 0755);
+		touch("app/views/admin/contentPerfil.php", 0755);
+
+		$adminBlog = fopen("app/controllers/admin/perfil.php", "w");
+		
+		fwrite($adminBlog,'<?php'.PHP_EOL);
+		fwrite($adminBlog,'include("../../config/meta.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/viewBase/header.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/viewBase/menu.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/viewBase/menuAdmin.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/admin/contentPerfil.php");'.PHP_EOL);
+		fwrite($adminBlog,'include("../../views/viewBase/footer.php");'.PHP_EOL);
+		fclose($adminBlog);
+	}	
 	fwrite($adminMenu, PHP_EOL.'</ul>');
 	fclose($adminMenu);
 }
