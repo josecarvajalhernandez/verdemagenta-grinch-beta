@@ -89,7 +89,7 @@ if($CONFIG_DIRECTORY == TRUE)
 //--------------------------------------------------------------------------------------------
 //configuración estatica , solo es necesario editar la conexion a la base de datos
 
-	$configDirectory = array('content','controller','database','models','meta');
+	$configDirectory = array('content','database','models','meta');
 	
 	foreach($configDirectory as $c)
 	{
@@ -129,7 +129,7 @@ if($CONFIG_DIRECTORY == TRUE)
 		fwrite($configMeta, '<?php' . PHP_EOL.  
 							'function saca_dominio($url)'.PHP_EOL.
 							'{'.PHP_EOL.
-							'	$protocolos = array("http://", "https://", "ftp://", "www.",".cl",".com",".net",".org");'.PHP_EOL.
+							'	$protocolos = array("http://", "https://", "ftp://", "www.",".cl",".com",".net",".org",".co",".es",".io",".info",".ar",".ve");'.PHP_EOL.
 	                        '	$url = explode("/", str_replace($protocolos, "", $url));'.PHP_EOL.
     	                    '	return $url[0];'.PHP_EOL.
 							'}'.PHP_EOL.
@@ -316,7 +316,7 @@ if($ADMIN == TRUE)
 	touch("app/views/admin/contentAdmin.php", 0755);	
 
 	$contentAdmin = fopen("app/views/admin/contentAdmin.php", "w");
-	fwrite($contentAdmin, '<h2>Panel de administración <?=$_SERVER["SERVER_NAME"];?></h2>' . PHP_EOL);
+	fwrite($contentAdmin, '<h2>Panel de administración <?=$nombreProyecto;?></h2>' . PHP_EOL);
 	fclose($contentAdmin);
 
 	$admin = fopen("app/controllers/admin/admin.php","w");
@@ -351,6 +351,10 @@ if($ADMIN == TRUE)
 		touch("app/controllers/admin/blog.php", 0755);
 		touch("app/views/admin/contentBlog.php", 0755);
 
+		$contentBlog = fopen("app/views/admin/contentBlog.php", "w");
+		fwrite($contentBlog, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$file;?></h2>' . PHP_EOL);
+		fclose($contentBlog);
+
 		$adminBlog = fopen("app/controllers/admin/blog.php", "w");
 		
 		fwrite($adminBlog,'<?php'.PHP_EOL);
@@ -372,6 +376,10 @@ if($ADMIN == TRUE)
 
 		touch("app/controllers/admin/perfil.php", 0755);
 		touch("app/views/admin/contentPerfil.php", 0755);
+
+		$contentLogin = fopen("app/views/admin/contentPerfil.php", "w");
+		fwrite($contentLogin, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$file;?></h2>' . PHP_EOL);
+		fclose($contentLogin);
 
 		$adminBlog = fopen("app/controllers/admin/perfil.php", "w");
 		
