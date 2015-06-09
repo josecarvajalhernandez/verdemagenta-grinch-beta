@@ -1,9 +1,13 @@
 <?php 
-/**GrinchVM Beta V 1.3.5.2
- 	
+/**GrinchVM  BETA
+	
+	autor:José Carvajal Hernández
+	sitio: www.verdemagenta.cl
+
  	El uso es de esta aplicación es de uso exclusivo para el equipo de desarrollo, no del cliente final,
 	por lo tanto este archivo luego de ser utilizado debe ser removido del servidor del cliente
-*/
+*/  
+	$proyecto 		   = 'verdemagenta';
 	$BASE_DIRECTORY    = TRUE;
 	$CONFIG_DIRECTORY  = TRUE;
 	$DYNAMIC_DIRECTORY = TRUE;
@@ -100,7 +104,7 @@ if($CONFIG_DIRECTORY == TRUE)
 		fwrite($configContent, '<?php' . PHP_EOL.
 							   '$file = basename($_SERVER["PHP_SELF"]);' . PHP_EOL.
 							   '$folder = str_replace(".php", "", $file);' . PHP_EOL.
-							   "include('../../views/'.".'$folder'.".'/content.php');");
+							   "include('../../views/'.".'$folder'.".'/content.php');". PHP_EOL);
 		fclose($configContent);
 
 		$configDataBase = fopen("app/config/database.php", "w");
@@ -108,9 +112,9 @@ if($CONFIG_DIRECTORY == TRUE)
 								   	'function conexion()'. PHP_EOL.
 								   	'{' . PHP_EOL.
 								   	'	 $server   = "localhost"; ' . PHP_EOL.
-								   	'	 $username = "usuario"; ' . PHP_EOL.
-								   	'	 $password = "clave"; ' . PHP_EOL.
-								   	'	 $database = "base de datos"; ' . PHP_EOL.
+								   	'	 $username = "root"; ' . PHP_EOL.
+								   	'	 $password = ""; ' . PHP_EOL.
+								   	'	 $database = "prueba"; ' . PHP_EOL.
 							       	'	 $link     = mysqli_connect($server, $username, $password, $database);' . PHP_EOL.
 							       	'	 mysqli_set_charset($link,"utf8");' . PHP_EOL.
 							       	'	 return($link);' . PHP_EOL.
@@ -136,6 +140,7 @@ if($CONFIG_DIRECTORY == TRUE)
 							'$nombreProyecto = saca_dominio($_SERVER["SERVER_NAME"]);'.PHP_EOL.
 							'$urlBase        = $_SERVER["SERVER_NAME"];'.PHP_EOL.
 							'$file           = basename($_SERVER["PHP_SELF"]);'.PHP_EOL.
+							'$folder = str_replace(".php", "", $file);' .PHP_EOL.
 							'$title          = $nombreProyecto;'.PHP_EOL.
 							'$description    = $nombreProyecto;');
 		fclose($configMeta);
@@ -184,7 +189,6 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		fwrite($models, '    {' . PHP_EOL);
 		fwrite($models, '     	 $row = mysqli_fetch_assoc($data);' . PHP_EOL);
 		fwrite($models, '     	 $res = $row[$result];' . PHP_EOL);
-		fwrite($models,  PHP_EOL);
 		fwrite($models, '     	 return $res;' . PHP_EOL);
 		fwrite($models, "    }" . PHP_EOL);
 		fwrite($models, "    else" . PHP_EOL);
@@ -216,14 +220,14 @@ if($DYNAMIC_DIRECTORY == TRUE)
 }
 if($MENU_FILE == "TRUE")
 {
-		$dynamicMeta = fopen("app/views/viewBase/menu.php", "a");
-		fwrite($dynamicMeta, PHP_EOL . '<ul>');
+		$dynamicMenu = fopen("app/views/viewBase/menu.php", "a");
+		fwrite($dynamicMenu, PHP_EOL . '<ul>');
 		foreach ($dynamicDirectory as $mn)
 		{
-			fwrite($dynamicMeta, PHP_EOL . "<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/".$mn."'>".$mn."</a></li>");	
+			fwrite($dynamicMenu, PHP_EOL . "<li><a href='http://".'<?=$_SERVER["SERVER_NAME"]?>'."/".$mn."'>".$mn."</a></li>");	
 		}
-		fwrite($dynamicMeta, PHP_EOL . '</ul>');
-		fclose($dynamicMeta);
+		fwrite($dynamicMenu, PHP_EOL . '</ul>');
+		fclose($dynamicMenu);
 }
 //-------------------------------------------------------------
 //INSTALANDOR HELPERS
@@ -245,7 +249,7 @@ if($HELPERS_DIRECTORY == TRUE)
 		fwrite($helper_email, '<?php' . PHP_EOL);
 		fwrite($helper_email, 'function contactMe($message, $email)' . PHP_EOL);
 		fwrite($helper_email, '{' . PHP_EOL);
-		fwrite($helper_email, '		$to = "exampl@email.com";' . PHP_EOL);
+		fwrite($helper_email, '		$to = "contacto@email.com";' . PHP_EOL);
 		fwrite($helper_email, '		$subject = "title message";' . PHP_EOL);
 		fwrite($helper_email, '		$txt = $message;' . PHP_EOL);
 		fwrite($helper_email, '		$headers = "From: ".$email. "\r\n";' . PHP_EOL);
@@ -332,7 +336,7 @@ if($ADMIN == TRUE)
 	$adminMenu = fopen("app/views/viewBase/menuAdmin.php", "w");
 	fwrite($adminMenu,PHP_EOL.'<h3>Menú de Administración</h3>');
 	fwrite($adminMenu,PHP_EOL.'<ul>');
-	fwrite($adminMenu,PHP_EOL."	<li><a href='http://".'<?=$urlBase?>'."/admin'>Home</a></li>");
+	fwrite($adminMenu,PHP_EOL."	<li><a href='http://".'<?=$urlBase?>'."/admin'>Home</a></li>".PHP_EOL);
 
 	$htaccessAdmin= fopen(".htaccess", "a");
 	fwrite($htaccessAdmin, "RewriteRule ^admin$ /app/controllers/admin/admin.php [L]" . PHP_EOL);
@@ -352,7 +356,7 @@ if($ADMIN == TRUE)
 		touch("app/views/admin/contentBlog.php", 0755);
 
 		$contentBlog = fopen("app/views/admin/contentBlog.php", "w");
-		fwrite($contentBlog, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$file;?></h2>' . PHP_EOL);
+		fwrite($contentBlog, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$folder;?></h2>' . PHP_EOL);
 		fclose($contentBlog);
 
 		$adminBlog = fopen("app/controllers/admin/blog.php", "w");
@@ -368,17 +372,38 @@ if($ADMIN == TRUE)
 	}
 	if($LOGIN == TRUE)
 	{
-		$htaccessPerfil = fopen(".htaccess", "a");
+//------------------------------------------------------------------------------------------------
+//CONEXIÓN A BASE DE DATOS Y CREACIÓN DE USUARIO
+//------------------------------------------------------------------------------------------------
+		$server   = "localhost"; 
+	 	$username = "root"; 
+		$password = ""; 
+	 	$database = "prueba"; 
+		$link     = mysqli_connect($server, $username, $password, $database);
+	 	
+	 	mysqli_set_charset($link,"utf8");
+
+		$crearTablaUsuario = "CREATE TABLE usuario (id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,nombre VARCHAR(70) NOT NULL,usuario VARCHAR(50) NOT NULL,password VARCHAR(50) NOT NULL,correo VARCHAR(50) NOT NULL,permiso VARCHAR(25) NOT NULL,fecha_registro TIMESTAMP)";
+
+		$ejecutar   	   = mysqli_query($link, $crearTablaUsuario);
+		
+		$insertarUsuario   = "INSERT INTO usuario (usuario,password,nombre,permiso,correo)values('admin','admin','administrador','administrador','contacto@".$proyecto.".cl')";
+		$ejecutar   	   = mysqli_query($link, $insertarUsuario);
+
+
+//----------------------------------------------------------------------------------------
+		$htaccessPerfil    = fopen(".htaccess", "a");
+		
 		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
 		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil/$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
 		fclose($htaccessPerfil);
-		fwrite($adminMenu,"	<li><a href='http://".'<?=$urlBase?>'."/admin/mi-perfil'>Mi Perfil</a></li>".PHP_EOL);
+		fwrite($adminMenu,"	<li><a href='http://".'<?=$urlBase?>'."/admin/mi-perfil'>perfil</a></li>".PHP_EOL);
 
 		touch("app/controllers/admin/perfil.php", 0755);
 		touch("app/views/admin/contentPerfil.php", 0755);
 
 		$contentLogin = fopen("app/views/admin/contentPerfil.php", "w");
-		fwrite($contentLogin, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$file;?></h2>' . PHP_EOL);
+		fwrite($contentLogin, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$folder;?></h2>' . PHP_EOL);
 		fclose($contentLogin);
 
 		$adminBlog = fopen("app/controllers/admin/perfil.php", "w");
