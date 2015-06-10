@@ -13,6 +13,7 @@
 	$DYNAMIC_DIRECTORY = TRUE;
 	$HELPERS_DIRECTORY = TRUE;
 	$MENU_FILE 		   = TRUE;
+	$LOGIN 			   = TRUE;
 	$ADMIN    	       = TRUE;
 
 if($BASE_DIRECTORY == TRUE)
@@ -57,7 +58,14 @@ if($BASE_DIRECTORY == TRUE)
 	}
 	mkdir("app/views/viewBase", 0755);
 	chmod("app/views/viewBase", 0755);
-
+	
+	mkdir("app/views/formularios", 0755);
+	chmod("app/views/formularios", 0755);
+	
+	touch("app/views/formularios/ingreso.php", 0755);
+	$layoutIngreso = fopen("app/views/formularios/ingreso.php", "w");
+	fclose($layoutIngreso);
+	
 	touch("app/views/viewBase/header.php", 0755);
 	$viewBaseHeader = fopen("app/views/viewBase/header.php", "w");
 	fwrite($viewBaseHeader, "<!DOCTYPE html>" . PHP_EOL);
@@ -166,6 +174,10 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		fwrite($controllers, "<?php" . PHP_EOL);
 		fwrite($controllers, "include('../../config/meta.php');" . PHP_EOL);
 		fwrite($controllers, "include('../../views/viewBase/header.php');" . PHP_EOL);
+		if($LOGIN == TRUE)
+		{	
+			fwrite($controllers, "include('../../views/formularios/ingreso.php');" . PHP_EOL);
+		}
 		fwrite($controllers, "include('../../views/viewBase/menu.php');" . PHP_EOL);
 		fwrite($controllers, "include('../../config/content.php');" . PHP_EOL);
 		fwrite($controllers, "include('../../views/viewBase/footer.php');" . PHP_EOL);
@@ -309,7 +321,6 @@ if($HELPERS_DIRECTORY == TRUE)
 }
 if($ADMIN == TRUE)
 {
-	$LOGIN = TRUE;
 	$BLOG    = TRUE;
 	
 	mkdir("app/controllers/admin",0755);
@@ -324,7 +335,7 @@ if($ADMIN == TRUE)
 	fclose($contentAdmin);
 
 	$admin = fopen("app/controllers/admin/admin.php","w");
-	
+
 	fwrite($admin,'<?php'.PHP_EOL);
 	fwrite($admin,'include("../../config/meta.php");'.PHP_EOL);
 	fwrite($admin,'include("../../views/viewBase/header.php");'.PHP_EOL);
@@ -392,6 +403,7 @@ if($ADMIN == TRUE)
 
 
 //----------------------------------------------------------------------------------------
+		
 		$htaccessPerfil    = fopen(".htaccess", "a");
 		
 		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
@@ -399,8 +411,21 @@ if($ADMIN == TRUE)
 		fclose($htaccessPerfil);
 		fwrite($adminMenu,"	<li><a href='http://".'<?=$urlBase?>'."/admin/mi-perfil'>perfil</a></li>".PHP_EOL);
 
+		touch("app/views/formularios/ingreso.php",755);
 		touch("app/controllers/admin/perfil.php", 0755);
 		touch("app/views/admin/contentPerfil.php", 0755);
+
+		$login = fopen("app/views/formularios/ingreso.php", "w");
+		fwrite($login, '<form action ="" metod="post">' . PHP_EOL);
+		fwrite($login, '	Usuario<input type="text" name="usuario" >' . PHP_EOL);
+		fwrite($login, '	Cotraseña<input type="text" name="password" >' . PHP_EOL);
+		fwrite($login, '</form>' . PHP_EOL);
+		fclose($login);
+
+		mkdir("app/controllers/formularios", 0755);
+		chmod("app/controllers/formularios", 0755);
+
+
 
 		$contentLogin = fopen("app/views/admin/contentPerfil.php", "w");
 		fwrite($contentLogin, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$folder;?></h2>' . PHP_EOL);
@@ -416,7 +441,8 @@ if($ADMIN == TRUE)
 		fwrite($adminBlog,'include("../../views/admin/contentPerfil.php");'.PHP_EOL);
 		fwrite($adminBlog,'include("../../views/viewBase/footer.php");'.PHP_EOL);
 		fclose($adminBlog);
-	}	
+	}
+
 	fwrite($adminMenu, PHP_EOL.'</ul>');
 	fclose($adminMenu);
 }
