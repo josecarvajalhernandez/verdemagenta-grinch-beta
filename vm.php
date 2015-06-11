@@ -8,14 +8,25 @@
 	por lo tanto este archivo luego de ser utilizado debe ser removido del servidor del cliente
 */  
 	$proyecto 		   = 'verdemagenta';
+
 	$BASE_DIRECTORY    = TRUE;
 	$CONFIG_DIRECTORY  = TRUE;
 	$DYNAMIC_DIRECTORY = TRUE;
+	$MENU_FILE 		   = TRUE;	
 	$HELPERS_DIRECTORY = TRUE;
-	$MENU_FILE 		   = TRUE;
-	$LOGIN 			   = TRUE;
-	$ADMIN    	       = TRUE;
+	$ADMIN    	       = TRUE;//MODULOS DE ADMINISTRACION,CONTENIDO DEL SITIO,BLOG ETC(REQUIERE QUE $LOGIN_ADMIN SEA TRUE)
 
+	if($HELPERS_DIRECTORY == TRUE)
+	{
+		$VALIDATION_HELPER = TRUE;
+		$EMAIL_HELPER      = TRUE;
+	}
+	if($ADMIN == TRUE)
+	{		
+		$LOGIN_USER	 = TRUE;//(OPCIONAL)LOGIN COMUN PARA USUARIOS
+		$LOGIN_ADMIN 		 = TRUE;//(OBLIGATORIO SI SE REQUIERE ADMINISTRACION)LOGIN DE ADMINISTRACION DE MODULOS SOLO PARA CUENTAS DE ADMINISTRADOR
+		$BLOG    	 = TRUE;
+	}
 if($BASE_DIRECTORY == TRUE)
 {
 /**CARPETAS BASE*/
@@ -51,23 +62,20 @@ if($BASE_DIRECTORY == TRUE)
     	return $url[0];
 	}
 	echo 'Haz instalado el framework en '.saca_dominio($_SERVER["SERVER_NAME"]).' correctamente';
+	
 	foreach($baseDirectory as $b)
 	{
 		mkdir("app/".$b, 0755);
 		chmod("app/".$b, 0755);
 	}
+	
 	mkdir("app/views/viewBase", 0755);
 	chmod("app/views/viewBase", 0755);
 	
-	mkdir("app/views/formularios", 0755);
-	chmod("app/views/formularios", 0755);
-	
-	touch("app/views/formularios/ingreso.php", 0755);
-	$layoutIngreso = fopen("app/views/formularios/ingreso.php", "w");
-	fclose($layoutIngreso);
-	
 	touch("app/views/viewBase/header.php", 0755);
+	
 	$viewBaseHeader = fopen("app/views/viewBase/header.php", "w");
+	
 	fwrite($viewBaseHeader, "<!DOCTYPE html>" . PHP_EOL);
 	fwrite($viewBaseHeader, "<html lang='esp'>" . PHP_EOL);
 	fwrite($viewBaseHeader, "<head>" . PHP_EOL);
@@ -174,7 +182,7 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		fwrite($controllers, "<?php" . PHP_EOL);
 		fwrite($controllers, "include('../../config/meta.php');" . PHP_EOL);
 		fwrite($controllers, "include('../../views/viewBase/header.php');" . PHP_EOL);
-		if($LOGIN == TRUE)
+		if($LOGIN_USER == TRUE)
 		{	
 			fwrite($controllers, "include('../../views/formularios/ingreso.php');" . PHP_EOL);
 		}
@@ -247,8 +255,6 @@ if($MENU_FILE == "TRUE")
 //los helper pueden ser activados según los modulos que necesite el proyecto
 if($HELPERS_DIRECTORY == TRUE)
 {
-	$VALIDATION_HELPER = TRUE;
-	$EMAIL_HELPER      = TRUE;
 
 	if($EMAIL_HELPER == TRUE)
 	{
@@ -321,7 +327,25 @@ if($HELPERS_DIRECTORY == TRUE)
 }
 if($ADMIN == TRUE)
 {
-	$BLOG    = TRUE;
+//------------------------------------------------------------------------------------------------
+//CONEXIÓN A BASE DE DATOS Y CREACIÓN DE USUARIO
+//------------------------------------------------------------------------------------------------
+	$server   = "localhost"; 
+	$username = "root"; 
+	$password = ""; 
+	$database = "prueba"; 
+	$link     = mysqli_connect($server, $username, $password, $database);
+	 	
+	mysqli_set_charset($link,"utf8");
+
+	$crearTablaUsuario = "CREATE TABLE usuario (id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,nombre VARCHAR(70) NOT NULL,usuario VARCHAR(50) NOT NULL,password VARCHAR(50) NOT NULL,correo VARCHAR(50) NOT NULL,permiso VARCHAR(25) NOT NULL,fecha_registro TIMESTAMP)";
+
+	$ejecutar   	   = mysqli_query($link, $crearTablaUsuario);
+		
+	$insertarUsuario   = "INSERT INTO usuario (usuario,password,nombre,permiso,correo)values('admin','admin','administrador','administrador','contacto@".$proyecto.".cl')";
+	$ejecutar   	   = mysqli_query($link, $insertarUsuario);
+
+//----------------------------------------------------------------------------------------
 	
 	mkdir("app/controllers/admin",0755);
 	mkdir("app/views/admin",0755);
@@ -381,51 +405,43 @@ if($ADMIN == TRUE)
 		fwrite($adminBlog,'include("../../views/viewBase/footer.php");'.PHP_EOL);
 		fclose($adminBlog);
 	}
-	if($LOGIN == TRUE)
+	if($LOGIN_ADMIN == TRUE)
 	{
-//------------------------------------------------------------------------------------------------
-//CONEXIÓN A BASE DE DATOS Y CREACIÓN DE USUARIO
-//------------------------------------------------------------------------------------------------
-		$server   = "localhost"; 
-	 	$username = "root"; 
-		$password = ""; 
-	 	$database = "prueba"; 
-		$link     = mysqli_connect($server, $username, $password, $database);
-	 	
-	 	mysqli_set_charset($link,"utf8");
-
-		$crearTablaUsuario = "CREATE TABLE usuario (id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,nombre VARCHAR(70) NOT NULL,usuario VARCHAR(50) NOT NULL,password VARCHAR(50) NOT NULL,correo VARCHAR(50) NOT NULL,permiso VARCHAR(25) NOT NULL,fecha_registro TIMESTAMP)";
-
-		$ejecutar   	   = mysqli_query($link, $crearTablaUsuario);
-		
-		$insertarUsuario   = "INSERT INTO usuario (usuario,password,nombre,permiso,correo)values('admin','admin','administrador','administrador','contacto@".$proyecto.".cl')";
-		$ejecutar   	   = mysqli_query($link, $insertarUsuario);
-
-
-//----------------------------------------------------------------------------------------
-		
 		$htaccessPerfil    = fopen(".htaccess", "a");
 		
 		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
 		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil/$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
+		fwrite($htaccessPerfil, "RewriteRule ^cuenta$ /app/controllers/cuenta/ingreso.php [L]" . PHP_EOL);
+		fwrite($htaccessPerfil, "RewriteRule ^cuenta/$ /app/controllers/cuenta/ingreso.php [L]" . PHP_EOL);
 		fclose($htaccessPerfil);
+		
 		fwrite($adminMenu,"	<li><a href='http://".'<?=$urlBase?>'."/admin/mi-perfil'>perfil</a></li>".PHP_EOL);
+		
+		mkdir("app/views/formularios", 0755);
+		chmod("app/views/formularios", 0755);
 
 		touch("app/views/formularios/ingreso.php",755);
 		touch("app/controllers/admin/perfil.php", 0755);
 		touch("app/views/admin/contentPerfil.php", 0755);
 
 		$login = fopen("app/views/formularios/ingreso.php", "w");
-		fwrite($login, '<form action ="" metod="post">' . PHP_EOL);
-		fwrite($login, '	Usuario<input type="text" name="usuario" >' . PHP_EOL);
-		fwrite($login, '	Cotraseña<input type="text" name="password" >' . PHP_EOL);
+		fwrite($login, '<form name="ingreso" action="http://<?=$urlBase?>/cuenta" metod="post">' . PHP_EOL);
+		fwrite($login, '	Usuario<input required="required"  type="text" name="usuario" >' . PHP_EOL);
+		fwrite($login, '	Cotraseña<input required="required"  type="text" name="password" >' . PHP_EOL);
+		fwrite($login, '	<input type="hidden" name="pagina" value="<?=$folder;?>">' . PHP_EOL);
+		fwrite($login, '	<input type="submit" name="btnIngreso" value="ingresa">' . PHP_EOL);
+		fwrite($login, '	<a href="">(¿olvidaste tu contraseña?)</a> o <a href="">registrate</a>' . PHP_EOL);
 		fwrite($login, '</form>' . PHP_EOL);
 		fclose($login);
 
-		mkdir("app/controllers/formularios", 0755);
-		chmod("app/controllers/formularios", 0755);
+		mkdir("app/controllers/cuenta", 0755);
+		chmod("app/controllers/cuenta", 0755);
 
+		touch("app/controllers/cuenta/ingreso.php", 0755);
 
+		$contentLogin = fopen("app/controllers/cuenta/ingreso.php", "w");
+		fwrite($contentLogin, '<?php' . PHP_EOL);
+		fclose($contentLogin);
 
 		$contentLogin = fopen("app/views/admin/contentPerfil.php", "w");
 		fwrite($contentLogin, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$folder;?></h2>' . PHP_EOL);
@@ -442,7 +458,6 @@ if($ADMIN == TRUE)
 		fwrite($adminBlog,'include("../../views/viewBase/footer.php");'.PHP_EOL);
 		fclose($adminBlog);
 	}
-
 	fwrite($adminMenu, PHP_EOL.'</ul>');
 	fclose($adminMenu);
 }
