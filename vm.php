@@ -24,7 +24,7 @@
 	if($ADMIN == TRUE)
 	{		
 		$LOGIN_USER	 = TRUE;//(OPCIONAL)LOGIN COMUN PARA USUARIOS
-		$LOGIN_ADMIN 		 = TRUE;//(OBLIGATORIO SI SE REQUIERE ADMINISTRACION)LOGIN DE ADMINISTRACION DE MODULOS SOLO PARA CUENTAS DE ADMINISTRADOR
+		$LOGIN_ADMIN = TRUE;//(OBLIGATORIO SI SE REQUIERE ADMINISTRACION)LOGIN DE ADMINISTRACION DE MODULOS SOLO PARA CUENTAS DE ADMINISTRADOR
 		$BLOG    	 = TRUE;
 	}
 if($BASE_DIRECTORY == TRUE)
@@ -146,7 +146,8 @@ if($CONFIG_DIRECTORY == TRUE)
 		fclose($configModel);
 
 		$configMeta = fopen("app/config/meta.php", "w");
-		fwrite($configMeta, '<?php' . PHP_EOL.  
+		fwrite($configMeta, '<?php' . PHP_EOL.
+							'session_start();'.PHP_EOL.  
 							'function saca_dominio($url)'.PHP_EOL.
 							'{'.PHP_EOL.
 							'	$protocolos = array("http://", "https://", "ftp://", "www.",".cl",".com",".net",".org",".co",".es",".io",".info",".ar",".ve");'.PHP_EOL.
@@ -184,7 +185,7 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		fwrite($controllers, "include('../../views/viewBase/header.php');" . PHP_EOL);
 		if($LOGIN_USER == TRUE)
 		{	
-			fwrite($controllers, "include('../../views/formularios/ingreso.php');" . PHP_EOL);
+			fwrite($controllers, "include('../../helpers/login/login.php');" . PHP_EOL);
 		}
 		fwrite($controllers, "include('../../views/viewBase/menu.php');" . PHP_EOL);
 		fwrite($controllers, "include('../../config/content.php');" . PHP_EOL);
@@ -227,13 +228,19 @@ if($DYNAMIC_DIRECTORY == TRUE)
 		fclose($views);
 
 		$dynamicMeta = fopen("app/config/meta.php", "a");
-		fwrite($dynamicMeta, PHP_EOL . "if(".'$file'." == '".$dd.".php')".'$title'." = '".$dd."';");
-		fwrite($dynamicMeta, PHP_EOL . "if(".'$file'." == '".$dd.".php')".'$description'." = '".$dd."';");
+		fwrite($dynamicMeta, PHP_EOL . "if(".'$file'." == '".$dd.".php')");
+		fwrite($dynamicMeta, PHP_EOL . "{");
+		fwrite($dynamicMeta, PHP_EOL . '	$title'." = '".$dd."';");
+		fwrite($dynamicMeta, PHP_EOL . '	$description'." = '".$dd."';");
+		fwrite($dynamicMeta, PHP_EOL . "}");
 		fclose($dynamicMeta);
 
 		$htaccessDinamic = fopen(".htaccess", "a");
 		fwrite($htaccessDinamic, "RewriteRule ^".$dd."$ /app/controllers/".$dd."/".$dd.".php [L]" . PHP_EOL);
-		fwrite($htaccessDinamic, "RewriteRule ^".$dd."/$ /app/controllers/".$dd."/".$dd.".php [L]" . PHP_EOL);
+		if($LOGIN_ADMIN == TRUE)
+		{
+			fwrite($htaccessDinamic, "RewriteRule ^cuenta/ingreso/".$dd."$ /app/controllers/cuenta/ingreso.php?pagina=".$dd." [L]" . PHP_EOL);
+		}
 		fclose($htaccessDinamic);
 
 	}
@@ -334,16 +341,16 @@ if($ADMIN == TRUE)
 	$username = "root"; 
 	$password = ""; 
 	$database = "prueba"; 
-	$link     = mysqli_connect($server, $username, $password, $database);
+	$conec     = mysqli_connect($server, $username, $password, $database);
 	 	
-	mysqli_set_charset($link,"utf8");
+	mysqli_set_charset($conec,"utf8");
 
 	$crearTablaUsuario = "CREATE TABLE usuario (id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,nombre VARCHAR(70) NOT NULL,usuario VARCHAR(50) NOT NULL,password VARCHAR(50) NOT NULL,correo VARCHAR(50) NOT NULL,permiso VARCHAR(25) NOT NULL,fecha_registro TIMESTAMP)";
 
-	$ejecutar   	   = mysqli_query($link, $crearTablaUsuario);
+	$ejecutar   	   = mysqli_query($conec, $crearTablaUsuario);
 		
 	$insertarUsuario   = "INSERT INTO usuario (usuario,password,nombre,permiso,correo)values('admin','admin','administrador','administrador','contacto@".$proyecto.".cl')";
-	$ejecutar   	   = mysqli_query($link, $insertarUsuario);
+	$ejecutar   	   = mysqli_query($conec, $insertarUsuario);
 
 //----------------------------------------------------------------------------------------
 	
@@ -376,7 +383,26 @@ if($ADMIN == TRUE)
 	$htaccessAdmin= fopen(".htaccess", "a");
 	fwrite($htaccessAdmin, "RewriteRule ^admin$ /app/controllers/admin/admin.php [L]" . PHP_EOL);
 	fwrite($htaccessAdmin, "RewriteRule ^admin/$ /app/controllers/admin/admin.php [L]" . PHP_EOL);
+	fwrite($htaccessAdmin, "RewriteRule ^cuenta/ingreso$ /app/controllers/cuenta/ingreso.php [L]" . PHP_EOL);
+	fwrite($htaccessAdmin, "RewriteRule ^cuenta/ingreso/$ /app/controllers/cuenta/ingreso.php [L]" . PHP_EOL);
+	fwrite($htaccessAdmin, "RewriteRule ^cuenta/cerrar$ /app/controllers/cuenta/cerrar.php [L]" . PHP_EOL);
 	fclose($htaccessAdmin);
+
+	mkdir("app/helpers/login",0755);
+
+	touch("app/helpers/login/login.php",0755);
+
+	$herlperLogin = fopen("app/helpers/login/login.php", "w");
+	fwrite($herlperLogin,  '<?php' . PHP_EOL);
+	fwrite($herlperLogin,  'if(!isset($_SESSION["usuario"]))' . PHP_EOL);
+	fwrite($herlperLogin,  '{' . PHP_EOL);
+	fwrite($herlperLogin,  '	include("../../views/viewBase/login.php");' . PHP_EOL);
+	fwrite($herlperLogin,  '}' . PHP_EOL);
+	fwrite($herlperLogin,  'else' . PHP_EOL);
+	fwrite($herlperLogin,  '{?>' . PHP_EOL);
+	fwrite($herlperLogin,  "	<a href='http://".'<?=$urlBase?>'."/cuenta/cerrar'>cerrar sesion</a><?php" . PHP_EOL);
+	fwrite($herlperLogin,  '}' . PHP_EOL);
+	fclose($herlperLogin);
 
 	if($BLOG == TRUE) 
 	{
@@ -405,50 +431,139 @@ if($ADMIN == TRUE)
 		fwrite($adminBlog,'include("../../views/viewBase/footer.php");'.PHP_EOL);
 		fclose($adminBlog);
 	}
+	if($LOGIN_USER == TRUE)
+	{
+		touch("app/views/viewBase/login.php",755);
+
+		$login = fopen("app/views/viewBase/login.php", "w");
+		fwrite($login, "<a href='http://".'<?=$urlBase?>'."/cuenta/ingreso/".'<?=$folder?>'."'>Ingresa</a>|<a href='http://".'<?=$urlBase?>'."/cuenta/registro'>Regístrate</a>". PHP_EOL);
+		fclose($login);
+	}
 	if($LOGIN_ADMIN == TRUE)
 	{
 		$htaccessPerfil    = fopen(".htaccess", "a");
 		
 		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
 		fwrite($htaccessPerfil, "RewriteRule ^admin/mi-perfil/$ /app/controllers/admin/perfil.php [L]" . PHP_EOL);
-		fwrite($htaccessPerfil, "RewriteRule ^cuenta$ /app/controllers/cuenta/ingreso.php [L]" . PHP_EOL);
-		fwrite($htaccessPerfil, "RewriteRule ^cuenta/$ /app/controllers/cuenta/ingreso.php [L]" . PHP_EOL);
 		fclose($htaccessPerfil);
 		
-		fwrite($adminMenu,"	<li><a href='http://".'<?=$urlBase?>'."/admin/mi-perfil'>perfil</a></li>".PHP_EOL);
+		fwrite($adminMenu,"<li><a href='http://".'<?=$urlBase?>'."/admin/mi-perfil'>perfil</a></li>".PHP_EOL);
 		
 		mkdir("app/views/formularios", 0755);
 		chmod("app/views/formularios", 0755);
 
 		touch("app/views/formularios/ingreso.php",755);
-		touch("app/controllers/admin/perfil.php", 0755);
-		touch("app/views/admin/contentPerfil.php", 0755);
-
-		$login = fopen("app/views/formularios/ingreso.php", "w");
-		fwrite($login, '<form name="ingreso" action="http://<?=$urlBase?>/cuenta" metod="post">' . PHP_EOL);
-		fwrite($login, '	Usuario<input required="required"  type="text" name="usuario" >' . PHP_EOL);
-		fwrite($login, '	Cotraseña<input required="required"  type="text" name="password" >' . PHP_EOL);
-		fwrite($login, '	<input type="hidden" name="pagina" value="<?=$folder;?>">' . PHP_EOL);
-		fwrite($login, '	<input type="submit" name="btnIngreso" value="ingresa">' . PHP_EOL);
-		fwrite($login, '	<a href="">(¿olvidaste tu contraseña?)</a> o <a href="">registrate</a>' . PHP_EOL);
-		fwrite($login, '</form>' . PHP_EOL);
-		fclose($login);
+		
+		$formularioIngreso = fopen("app/views/formularios/ingreso.php", "w");
+		fwrite($formularioIngreso, '<form name="ingreso" action="" method="post">' . PHP_EOL);
+		fwrite($formularioIngreso, '	<input required="required" placeholder="Usuario" type="text" name="usuario"><br/>' . PHP_EOL);
+		fwrite($formularioIngreso, '	<input required="required" placeholder="Contraseña" type="password" name="password"><br/>' . PHP_EOL);
+		fwrite($formularioIngreso, "	<input type='hidden' name='pagina' value=".'"<?=$_GET["pagina"];?>"'.">" . PHP_EOL);
+		fwrite($formularioIngreso, '	<input type="submit" name="btnIngreso" value="ingresa"><br/>' . PHP_EOL);
+		fwrite($formularioIngreso, '	<a href="">(¿olvidaste tu contraseña?)</a> o <a href="">registrate</a>' . PHP_EOL);
+		fwrite($formularioIngreso, '</form>' . PHP_EOL);
+		fclose($formularioIngreso);
 
 		mkdir("app/controllers/cuenta", 0755);
 		chmod("app/controllers/cuenta", 0755);
 
 		touch("app/controllers/cuenta/ingreso.php", 0755);
-
 		$contentLogin = fopen("app/controllers/cuenta/ingreso.php", "w");
-		fwrite($contentLogin, '<?php' . PHP_EOL);
+		fwrite($contentLogin,  '<?php'.PHP_EOL.
+						  	   "include('../../config/meta.php');".PHP_EOL.
+						  	   'if($_POST)'.PHP_EOL.
+						  	   '{'.PHP_EOL.
+						  	   '	if($_POST["btnIngreso"] == "ingresa")'.PHP_EOL.
+							   '	{'.PHP_EOL.
+							   '		include("../../helpers/validations/validations.php");'.PHP_EOL.
+							   '		include("../../helpers/email/email.php");'.PHP_EOL.
+							   ''.PHP_EOL.
+							   '		$usuario  = clear($_POST["usuario"]);'.PHP_EOL.
+							   '		$password = clear($_POST["password"]);'.PHP_EOL.
+							   ''.PHP_EOL.
+							   '		$usuarioOk  = textFieldOk($usuario);'.PHP_EOL.
+							   '		$passwordOk = textFieldOk($password);'.PHP_EOL.
+							   ''.PHP_EOL.
+							   '		if(($usuarioOk == TRUE)&&($passwordOk == TRUE))'.PHP_EOL.
+							   '		{'.PHP_EOL.
+							   '			include("../../models/usuario.php");'.PHP_EOL.
+							   '			$query = usuarioExiste($usuario,$password);'.PHP_EOL.
+							   ''.PHP_EOL.		
+							   '	    	if($query == TRUE)'.PHP_EOL.
+							   '			{'.PHP_EOL.
+							   '				$_SESSION["usuario"] = $usuarioOk;'.PHP_EOL.
+							   '				header("Location: ../../".$_POST["pagina"]);'.PHP_EOL.
+							   '			}'.PHP_EOL.
+							   '			else'.PHP_EOL.
+							   '			{?>'.PHP_EOL.
+							   '				<script>'.PHP_EOL.
+							   "					alert('el usuario y/o contraseña son incorrectos');".PHP_EOL.	
+							   "  				</script><?php".PHP_EOL.
+							   '			}'.PHP_EOL.
+							   '		}'.PHP_EOL.	
+							   '	}'.PHP_EOL.
+							   '	else'.PHP_EOL.
+							   '	{'.PHP_EOL.
+							   '		header("Location: ../index");'.PHP_EOL.
+							   '	}'.PHP_EOL.
+						  	   '}'.PHP_EOL.
+						  	   "include('../../views/viewBase/header.php');".PHP_EOL.
+						  	   "include('../../views/viewBase/menu.php');".PHP_EOL.
+						  	   "include('../../views/cuenta/ingreso.php');".PHP_EOL.
+						  	   "include('../../views/viewBase/footer.php');".PHP_EOL);
 		fclose($contentLogin);
 
-		$contentLogin = fopen("app/views/admin/contentPerfil.php", "w");
+		touch("app/controllers/cuenta/cerrar.php", 0755);
+		
+		$cerrarCuenta = fopen("app/controllers/cuenta/cerrar.php", "w");
+		fwrite($cerrarCuenta, '<?php' . PHP_EOL);
+		fwrite($cerrarCuenta, 'session_start();' . PHP_EOL);
+		fwrite($cerrarCuenta, 'session_destroy();' . PHP_EOL);
+		fwrite($cerrarCuenta, "header('location: ../index');".PHP_EOL);
+		fclose($cerrarCuenta);
+
+		mkdir("app/views/cuenta", 0755);
+		chmod("app/views/cuenta", 0755);
+
+		touch("app/views/cuenta/ingreso.php", 0755);
+		$contentIngreso = fopen("app/views/cuenta/ingreso.php","w");
+		fwrite($contentIngreso, '<?php include("../../views/formularios/ingreso.php");?>' . PHP_EOL);
+		fclose($contentIngreso);
+
+		touch("app/views/admin/contentPerfil.php", 0755);
+		$contentLogin 	= fopen("app/views/admin/contentPerfil.php", "w");
 		fwrite($contentLogin, '<h2>Panel de administración <?=$nombreProyecto;?>|<?=$folder;?></h2>' . PHP_EOL);
 		fclose($contentLogin);
 
+		touch('app/models/usuario.php',0755);
+		$modelusuario = fopen("app/models/usuario.php","w");
+		fwrite($modelusuario,  '<?php ' .PHP_EOL);
+		fwrite($modelusuario,  'require("../../config/database.php");' .PHP_EOL);
+		fwrite($modelusuario,  '$link = conexion();' .PHP_EOL);
+		fwrite($modelusuario,  '' .PHP_EOL);
+		fwrite($modelusuario,  'function usuarioExiste($usuario,$password)' .PHP_EOL);
+		fwrite($modelusuario,  '{' .PHP_EOL);
+		fwrite($modelusuario,  '	global $link;' .PHP_EOL);
+		fwrite($modelusuario,  '' .PHP_EOL);
+		fwrite($modelusuario,  '	$query  = " SELECT id FROM usuario WHERE usuario = '."'".'{$usuario}'."'".'  AND password = '."'".'{$password}'."'".' ";' .PHP_EOL);
+		fwrite($modelusuario,  '' .PHP_EOL);
+		fwrite($modelusuario,  '	$data   = mysqli_query($link, $query);' .PHP_EOL);
+		fwrite($modelusuario,  '	if(mysqli_num_rows($data) !== 0)' .PHP_EOL);
+		fwrite($modelusuario,  '	{' .PHP_EOL);
+		fwrite($modelusuario,  '		$row = mysqli_fetch_assoc($data);' .PHP_EOL);
+		fwrite($modelusuario,  '		$res = $row["id"]; ' .PHP_EOL);
+		fwrite($modelusuario,  '' .PHP_EOL);
+		fwrite($modelusuario,  '		return $res;' .PHP_EOL);
+		fwrite($modelusuario,  '    }' .PHP_EOL);
+		fwrite($modelusuario,  '	else' .PHP_EOL);
+		fwrite($modelusuario,  '	{' .PHP_EOL);
+		fwrite($modelusuario,  '     	return FALSE;' .PHP_EOL);
+		fwrite($modelusuario,  '	}' .PHP_EOL);
+		fwrite($modelusuario,  '}' .PHP_EOL);
+		fclose($modelusuario);
+        
+		touch("app/controllers/admin/perfil.php", 0755);
 		$adminBlog = fopen("app/controllers/admin/perfil.php", "w");
-		
 		fwrite($adminBlog,'<?php'.PHP_EOL);
 		fwrite($adminBlog,'include("../../config/meta.php");'.PHP_EOL);
 		fwrite($adminBlog,'include("../../views/viewBase/header.php");'.PHP_EOL);
